@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  places-db:
+    image: postgres
+    container_name: places-db
+    restart: always
+
+    ports:
+      - "5432:5432"
+
+    environment:
+      POSTGRES_USER: 'places-admin'
+      POSTGRES_PASSWORD: 'places-root'
+      POSTGRES_DB: 'places-db'
+    
+    networks:
+      - places-network
+
+  places-app:
+    container_name: 
+    build:
+      context: .
+      dockerfile: src/main/docker/Dockerfile.jvm
+
+
+    depends_on:
+      - places-db
+
+    ports:
+      - "8080:8080"
+
+    networks:
+      - places-network
+    
+
+networks:
+  places-network:
+    driver: bridge
