@@ -1,5 +1,8 @@
 package io.codekaffee;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -13,6 +16,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import io.codekaffee.dto.PlaceDTO;
+import io.codekaffee.exceptions.PlaceNotFoundException;
 import io.codekaffee.models.Place;
 import io.codekaffee.services.PlaceService;
 
@@ -39,9 +43,22 @@ public class PlacesResource {
     @GET
     @Path("{slug}")
     public Response getBySlug(@PathParam("slug") String slug){
+        try{
+            Place place = placeService.findPlaceBySlug(slug);
+            return Response.ok(place).build();
+        }catch(PlaceNotFoundException nfex) {
+            Map<String, String> errResponse = new HashMap();
+            errResponse.put("message", nfex.getLocalizedMessage());
+            errResponse.put("err.cod", "place.not.found.exception");
 
-        System.out.println(slug);
-        return Response.ok().build();
+            return Response.status(Status.NOT_FOUND).entity(errResponse).build();
+
+        }catch(Exception e){
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        }
+
+    
+        
     }
 
 
