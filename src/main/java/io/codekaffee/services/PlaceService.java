@@ -21,46 +21,49 @@ public class PlaceService {
     private final Validator validator;
 
     @Inject
-    public PlaceService(PlaceRepository placeRepository, Validator validator){
+    public PlaceService(PlaceRepository placeRepository, Validator validator) {
         this.placeRepository = placeRepository;
         this.validator = validator;
     }
 
-
-
     @Transactional
-    public Place createPlace(PlaceDTO placeDTO){
+    public Place createPlace(PlaceDTO placeDTO) {
         Place place = new Place(placeDTO);
 
         var violations = validator.validate(placeDTO);
 
-        if(!violations.isEmpty()){
+        if (!violations.isEmpty()) {
             throw new RuntimeException(Arrays.toString(violations.toArray()));
         }
-
 
         placeRepository.persist(place);
 
         return place;
     }
 
-
-
-    public Place findPlaceBySlug(String slug){
+    public Place findPlaceBySlug(String slug) {
         Optional<Place> placeOpt = this.placeRepository.findBySlug(slug);
 
-        if(placeOpt.isEmpty()) {
+        if (placeOpt.isEmpty()) {
             throw new PlaceNotFoundException();
         }
-
 
         return placeOpt.get();
     }
 
+    @Transactional
+    public void deleteBySlug(String slug) {
 
+        try {
+            this.placeRepository.delete("slug", slug);
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
 
-    public List<Place> listAll(){
+    }
+
+    public List<Place> listAll() {
         return placeRepository.findAll().list();
     }
-    
+
 }
